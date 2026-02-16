@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CP ALL INTELLIGENT MONITORING</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
+    <style>
+        :root {
+            --bg-body: #fdfefd;
+            --primary-green: #4caf50;
+            --light-green: #e8f5e9;
+            --accent-yellow: #fff9c4;
+            --dark-text: #2e7d32;
+            --border-color: #c8e6c9;
+            --card-shadow: 0 4px 20px rgba(76, 175, 80, 0.15);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Sarabun', sans-serif;
+            background-color: var(--bg-body);
+            color: #333;
+            background-image: linear-gradient(120deg, #f1f8e9 0%, #fffde7 100%);
+        }
+
+        /* Header */
+        .header {
+            background: #ffffff;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--primary-green);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky; top: 0; z-index: 1000;
+        }
+        .title-box h1 {
+            margin: 0;
+            font-size: 1.6rem;
+            color: var(--dark-text);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .title-box p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #66bb6a;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1600px;
+            margin: 30px auto;
+            padding: 0 20px;
+            display: grid;
+            gap: 25px;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s;
+        }
+        .card:hover { transform: translateY(-3px); }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .kpi-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: linear-gradient(135deg, #ffffff 0%, var(--light-green) 100%);
+        }
+        .kpi-icon {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            background: white;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 1.8rem;
+            color: var(--primary-green);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .kpi-value { font-size: 2.5rem; font-weight: 700; color: var(--dark-text); line-height: 1; }
+        .kpi-label { font-size: 0.9rem; color: #666; margin-top: 5px; }
+
+        /* Filters */
+        .filter-bar {
+            display: flex; gap: 15px; margin-bottom: 10px; flex-wrap: wrap;
+        }
+        .custom-input {
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'Sarabun';
+            background: #fff;
+            color: var(--dark-text);
+            outline: none;
+        }
+        .custom-input:focus { border-color: var(--primary-green); }
+
+        /* Map & Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 450px;
+            gap: 25px;
+        }
+        @media (max-width: 1100px) { .main-grid { grid-template-columns: 1fr; } }
+
+        #map { height: 550px; border-radius: 12px; z-index: 1; border: 2px solid white; box-shadow: inset 0 0 10px rgba(0,0,0,0.05); }
+
+        /* Charts */
+        .chart-box { height: 350px; width: 100%; }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: var(--light-green); color: var(--dark-text); padding: 15px; text-align: left; font-weight: 700; }
+        td { padding: 12px 15px; border-bottom: 1px solid #eee; }
+        tr:hover td { background: #f9fbe7; }
+        
+        /* Status Badges */
+        .badge { padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+        
+        /* Loader */
+        #loader {
+            position: fixed; inset: 0; background: rgba(255,255,255,0.95);
+            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999;
+        }
+        .spinner {
+            width: 50px; height: 50px; border: 5px solid #e0e0e0;
+            border-top-color: var(--primary-green); border-radius: 50%;
+            animation: spin 1s infinite linear;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div id="loader">
+    <div class="spinner"></div>
+    <h3 style="color: var(--dark-text); margin-top: 20px;">กำลังเชื่อมต่อฐานข้อมูล...</h3>
+</div>
+
+<header class="header">
+    <div class="title-box">
+        <h1>CP ALL Fire Fighter Safety Switch</h1>
+        <p>INTELLIGENT MONITORING DASHBOARD</p>
+    </div>
+    <div>
+        <div class="filter-bar">
+            <input type="text" id="search" class="custom-input" placeholder="ค้นหาชื่อหน่วยงาน..." onkeyup="runFilter()">
+            <select id="regionSelect" class="custom-input" onchange="runFilter()">
+                <option value="All">ทุกภูมิภาค</option>
+                <option value="กลาง">ภาคกลาง</option>
+                <option value="ตะวันออก">ภาคตะวันออก</option>
+                <option value="เหนือ">ภาคเหนือ</option>
+                <option value="ตะวันออกเฉียงเหนือ">ภาคตะวันออกเฉียงเหนือ</option>
+                <option value="ใต้">ภาคใต้</option>
+            </select>
+        </div>
+        <div style="text-align: right; font-size: 0.8rem; color: #888;">
+            <i class="fa-solid fa-circle-check" style="color: var(--primary-green);"></i> อัปเดตล่าสุด: <span id="lastUpdate">...</span>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    
+    <div class="kpi-grid">
+        <div class="card kpi-card">
+            <div class="kpi-icon"><i class="fa-solid fa-chart-pie"></i></div>
+            <div>
+                <div class="kpi-value" id="kpi-progress">0%</div>
+                <div class="kpi-label">ความคืบหน้าภาพรวม</div>
+            </div>
+        </div>
+        <div class="card kpi-card">
+            <div class="kpi-icon" style="color: #2e7d32;"><i class="fa-solid fa-building-circle-check"></i></div>
+            <div>
+                <div class="kpi-value" id="kpi-done">0</div>
+                <div class="kpi-label">หน่วยงานที่เสร็จสิ้น</div>
+            </div>
+        </div>
+        <div class="card kpi-card">
+            <div class="kpi-icon" style="color: #fbc02d;"><i class="fa-solid fa-person-digging"></i></div>
+            <div>
+                <div class="kpi-value" id="kpi-working">0</div>
+                <div class="kpi-label">กำลังดำเนินการ</div>
+            </div>
+        </div>
+        <div class="card kpi-card">
+            <div class="kpi-icon" style="color: #d32f2f;"><i class="fa-solid fa-map"></i></div>
+            <div>
+                <div class="kpi-value" id="kpi-total">0</div>
+                <div class="kpi-label">จำนวนหน่วยงานทั้งหมด</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-grid">
+        <div class="card" style="padding: 10px;">
+            <h3 style="margin: 10px 0 15px 15px; color: var(--dark-text);"><i class="fa-solid fa-location-dot"></i> แผนที่แสดงสถานะโครงการ</h3>
+            <div id="map"></div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 25px;">
+            <div class="card">
+                <h3 style="margin-top:0; color: var(--dark-text);">สัดส่วนงาน (Work Breakdown)</h3>
+                <div id="pieChart" style="height: 250px;"></div>
+            </div>
+            <div class="card">
+                <h3 style="margin-top:0; color: var(--dark-text);">ความก้าวหน้าแยกรายภูมิภาค</h3>
+                <div id="barChart" style="height: 250px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 style="margin-top:0; color: var(--dark-text);"><i class="fa-solid fa-chart-column"></i> กราฟแสดงความคืบหน้ารายหน่วยงาน (Progress by Site)</h3>
+        <div id="mainBarChart" class="chart-box"></div>
+    </div>
+
+    <div class="card">
+        <h3 style="margin-top:0; color: var(--dark-text);"><i class="fa-solid fa-list"></i> ตารางรายละเอียดสถานะ (Detailed Status)</h3>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>WBS</th>
+                        <th>หน่วยงาน (Site Name)</th>
+                        <th>ภูมิภาค (Region)</th>
+                        <th width="25%">ความคืบหน้า (Progress Bar)</th>
+                        <th>%</th>
+                        <th>Due Date</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Link to Google Sheet CSV
+    const CSV_LINK = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGo5Zvqs3gYA7jzn_Fh5Wsn85H9k-UmJVSj4Y9i5xizESjXWLfORXj33tLCoH8Sg/pub?output=csv';
+
+    // Region & Coordinates Mapping
+    // Config นี้ใช้กรณีที่ใน CSV ไม่ได้ใส่ Lat/Long มาให้ จะใช้ค่า Default นี้แทน
+    const SITE_CONFIG = {
+        "1": { region: "กลาง", lat: 13.91, lng: 100.41 },
+        "2": { region: "กลาง", lat: 13.92, lng: 100.42 },
+        "3": { region: "กลาง", lat: 13.69, lng: 100.75 },
+        "4": { region: "กลาง", lat: 13.70, lng: 100.76 },
+        "5": { region: "กลาง", lat: 13.54, lng: 100.27 },
+        "6": { region: "กลาง", lat: 13.55, lng: 100.28 },
+        "7": { region: "ตะวันออก", lat: 13.36, lng: 100.98 },
+        "8": { region: "ตะวันออก", lat: 13.37, lng: 100.99 },
+        "9": { region: "ตะวันออกเฉียงเหนือ", lat: 16.43, lng: 102.82 },
+        "10": { region: "ตะวันออกเฉียงเหนือ", lat: 16.44, lng: 102.83 },
+        "11": { region: "ตะวันออกเฉียงเหนือ", lat: 16.43, lng: 102.82 },
+        "12": { region: "ตะวันออกเฉียงเหนือ", lat: 14.99, lng: 103.10 },
+        "13": { region: "เหนือ", lat: 18.57, lng: 99.00 },
+        "14": { region: "เหนือ", lat: 15.70, lng: 100.12 },
+        "15": { region: "เหนือ", lat: 15.71, lng: 100.13 },
+        "16": { region: "ตะวันออกเฉียงเหนือ", lat: 14.97, lng: 102.08 },
+        "17": { region: "ใต้", lat: 9.13, lng: 99.32 },
+        "18": { region: "ใต้", lat: 7.00, lng: 100.47 },
+        "19": { region: "ใต้", lat: 7.95, lng: 98.33 }
+    };
+
+    // Helper: เดาภูมิภาคจากชื่อ (กรณีไม่อยู่ใน Config)
+    function getRegionByName(name) {
+        if (!name) return "กลาง";
+        if (name.includes("Khonkaen") || name.includes("Buriram") || name.includes("Ratchasima")) return "ตะวันออกเฉียงเหนือ";
+        if (name.includes("Lamphun") || name.includes("Nakornsawan") || name.includes("Chiang Mai")) return "เหนือ";
+        if (name.includes("Suratthani") || name.includes("Hatyai") || name.includes("Phuket")) return "ใต้";
+        if (name.includes("Chonburi") || name.includes("Chacheongsao") || name.includes("Rayong")) return "ตะวันออก";
+        return "กลาง";
+    }
+
+    let map, pieChart, barChart, mainBarChart, rawData = [];
+
+    function init() {
+        // Init Map
+        map = L.map('map').setView([13.7, 100.5], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Init Charts
+        pieChart = echarts.init(document.getElementById('pieChart'));
+        barChart = echarts.init(document.getElementById('barChart'));
+        mainBarChart = echarts.init(document.getElementById('mainBarChart'));
+
+        fetchData();
+        // Auto refresh every 5 minutes
+        setInterval(fetchData, 300000); 
+        
+        window.onresize = () => { pieChart.resize(); barChart.resize(); mainBarChart.resize(); };
+    }
+
+    function fetchData() {
+        // *สำคัญ* เพิ่ม timestamp เพื่อป้องกัน Cache
+        const urlWithTimestamp = CSV_LINK + '&t=' + Date.now();
+
+        Papa.parse(urlWithTimestamp, {
+            download: true,
+            header: false, // ใช้ index อ้างอิง (เพราะเราไม่แน่ใจชื่อ Header ใน Sheet)
+            skipEmptyLines: true,
+            complete: function(res) {
+                const processed = [];
+                
+                // เริ่ม loop ข้อมูล (row)
+                res.data.forEach(row => {
+                    // Index: 1=WBS, 2=Name, 5=DueDate, 7=Progress (อ้างอิงจากโค้ดเดิม)
+                    const wbs = row[1]?.trim();
+                    const name = row[2];
+                    
+                    // กรองเฉพาะแถวที่มีข้อมูล WBS และชื่อ
+                    if (wbs && name) { 
+                        let region = "กลาง";
+                        let lat = 13.7, lng = 100.5;
+
+                        // Priority 1: ดูใน Config ตาม WBS
+                        if (SITE_CONFIG[wbs]) {
+                            region = SITE_CONFIG[wbs].region;
+                            lat = SITE_CONFIG[wbs].lat;
+                            lng = SITE_CONFIG[wbs].lng;
+                        } 
+                        // Priority 2: เดาจากชื่อ
+                        else {
+                            region = getRegionByName(name);
+                        }
+
+                        // Override: ตรวจสอบชื่ออีกครั้งเพื่อความแม่นยำ
+                        if(name.includes("Khonkaen") || name.includes("Buriram") || name.includes("Ratchasima")) region = "ตะวันออกเฉียงเหนือ";
+                        if(name.includes("Lamphun") || name.includes("Nakornsawan")) region = "เหนือ";
+                        if(name.includes("Suratthani") || name.includes("Hatyai") || name.includes("Phuket")) region = "ใต้";
+
+                        processed.push({
+                            wbs: wbs, 
+                            name: name, 
+                            progress: parseFloat(row[7]) || 0, // แปลง Progress เป็นตัวเลข
+                            due: row[5] || "-", 
+                            region: region, 
+                            lat: lat, 
+                            lng: lng
+                        });
+                    }
+                });
+
+                rawData = processed;
+                runFilter();
+                
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('lastUpdate').innerText = new Date().toLocaleTimeString('th-TH');
+            },
+            error: function(err) {
+                console.error("Error:", err);
+                document.getElementById('loader').innerHTML = "<h3 style='color:red'>เกิดข้อผิดพลาดในการโหลดข้อมูล</h3>";
+            }
+        });
+    }
+
+    function runFilter() {
+        const query = document.getElementById('search').value.toLowerCase();
+        const region = document.getElementById('regionSelect').value;
+        
+        const filtered = rawData.filter(d => 
+            (d.name && d.name.toLowerCase().includes(query)) && 
+            (region === 'All' || d.region === region)
+        );
+        updateUI(filtered);
+    }
+
+    function getColor(p) {
+        if (p >= 100) return '#4caf50'; // Green
+        if (p > 50) return '#29b6f6';   // Blue
+        if (p > 25) return '#ffb74d';   // Orange
+        return '#ef5350';               // Red
+    }
+
+    function updateUI(data) {
+        // KPIs
+        const done = data.filter(d => d.progress >= 100).length;
+        const avg = data.length ? Math.round(data.reduce((a,b)=>a+b.progress,0)/data.length) : 0;
+        
+        document.getElementById('kpi-progress').innerText = avg + "%";
+        document.getElementById('kpi-done').innerText = done;
+        document.getElementById('kpi-working').innerText = data.length - done;
+        document.getElementById('kpi-total').innerText = data.length;
+
+        // Map: Remove old markers & Add new ones
+        map.eachLayer(l => { if (l instanceof L.CircleMarker) map.removeLayer(l); });
+        
+        data.forEach(s => {
+            L.circleMarker([s.lat, s.lng], {
+                radius: 10, fillColor: getColor(s.progress), color: '#fff', weight: 2, fillOpacity: 0.9
+            }).addTo(map).bindPopup(`<b>${s.name}</b><br>สถานะ: ${s.progress}%`);
+        });
+
+        // Main Bar Chart (2D)
+        mainBarChart.setOption({
+            tooltip: { trigger: 'axis' },
+            grid: { left: '3%', right: '4%', bottom: '15%', containLabel: true },
+            xAxis: { 
+                type: 'category', 
+                data: data.map(s => s.name.substring(0, 15)), // ตัดชื่อให้สั้นลงถ้าล้น
+                axisLabel: { rotate: 45, interval: 0 } 
+            },
+            yAxis: { type: 'value', max: 100 },
+            series: [{
+                name: 'Progress',
+                type: 'bar',
+                data: data.map(s => ({
+                    value: s.progress,
+                    itemStyle: { color: getColor(s.progress) }
+                })),
+                barWidth: '50%',
+                itemStyle: { borderRadius: [5, 5, 0, 0] }
+            }]
+        });
+
+        // Pie Chart
+        pieChart.setOption({
+            tooltip: { trigger: 'item' },
+            series: [{
+                type: 'pie',
+                radius: ['40%', '70%'],
+                data: [
+                    { value: done, name: 'เสร็จสิ้น', itemStyle: { color: '#4caf50' } },
+                    { value: data.length - done, name: 'กำลังดำเนินการ', itemStyle: { color: '#ffb74d' } }
+                ]
+            }]
+        });
+
+        // Region Bar Chart
+        const regions = [...new Set(data.map(d=>d.region))];
+        const regionData = regions.map(r => {
+            const rData = data.filter(d=>d.region === r);
+            return Math.round(rData.reduce((a,b)=>a+b.progress,0)/rData.length);
+        });
+        
+        barChart.setOption({
+            tooltip: {},
+            xAxis: { type: 'value', max: 100 },
+            yAxis: { type: 'category', data: regions },
+            series: [{
+                type: 'bar',
+                data: regionData,
+                itemStyle: { color: '#81c784', borderRadius: [0, 10, 10, 0] },
+                label: { show: true, position: 'right', formatter: '{c}%' }
+            }]
+        });
+
+        // Table
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = "";
+        data.forEach(s => {
+            const color = getColor(s.progress);
+            tbody.innerHTML += `<tr>
+                <td>${s.wbs}</td>
+                <td><b>${s.name}</b></td>
+                <td><span class="badge" style="background:#f1f8e9; color:#33691e">${s.region}</span></td>
+                <td>
+                    <div style="background:#e0e0e0; border-radius:10px; height:8px;">
+                        <div style="width:${s.progress}%; background:${color}; height:100%; border-radius:10px;"></div>
+                    </div>
+                </td>
+                <td style="color:${color}; font-weight:bold;">${s.progress}%</td>
+                <td>${s.due}</td>
+            </tr>`;
+        });
+    }
+
+    window.onload = init;
+</script>
+</body>
+</html>
