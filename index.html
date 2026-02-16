@@ -18,7 +18,6 @@
             --bg-body: #fdfefd;
             --primary-green: #4caf50;
             --light-green: #e8f5e9;
-            --accent-yellow: #fff9c4;
             --dark-text: #2e7d32;
             --border-color: #c8e6c9;
             --card-shadow: 0 4px 20px rgba(76, 175, 80, 0.15);
@@ -43,18 +42,8 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             position: sticky; top: 0; z-index: 1000;
         }
-        .title-box h1 {
-            margin: 0;
-            font-size: 1.6rem;
-            color: var(--dark-text);
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-        .title-box p {
-            margin: 0;
-            font-size: 0.9rem;
-            color: #66bb6a;
-        }
+        .title-box h1 { margin: 0; font-size: 1.6rem; color: var(--dark-text); font-weight: 700; }
+        .title-box p { margin: 0; font-size: 0.9rem; color: #66bb6a; }
 
         /* Container */
         .container {
@@ -76,56 +65,29 @@
         }
         .card:hover { transform: translateY(-3px); }
 
-        /* KPI Cards */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        .kpi-card {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            background: linear-gradient(135deg, #ffffff 0%, var(--light-green) 100%);
-        }
+        /* KPI Grid */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .kpi-card { display: flex; align-items: center; gap: 20px; background: linear-gradient(135deg, #ffffff 0%, var(--light-green) 100%); }
         .kpi-icon {
-            width: 60px; height: 60px;
-            border-radius: 50%;
-            background: white;
+            width: 60px; height: 60px; border-radius: 50%; background: white;
             display: flex; justify-content: center; align-items: center;
-            font-size: 1.8rem;
-            color: var(--primary-green);
+            font-size: 1.8rem; color: var(--primary-green);
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         .kpi-value { font-size: 2.5rem; font-weight: 700; color: var(--dark-text); line-height: 1; }
         .kpi-label { font-size: 0.9rem; color: #666; margin-top: 5px; }
 
-        /* Filters */
-        .filter-bar {
-            display: flex; gap: 15px; margin-bottom: 10px; flex-wrap: wrap;
-        }
+        /* Filter */
+        .filter-bar { display: flex; gap: 15px; margin-bottom: 10px; flex-wrap: wrap; }
         .custom-input {
-            padding: 10px 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-family: 'Sarabun';
-            background: #fff;
-            color: var(--dark-text);
-            outline: none;
+            padding: 10px 15px; border: 1px solid var(--border-color); border-radius: 8px;
+            font-family: 'Sarabun'; outline: none;
         }
-        .custom-input:focus { border-color: var(--primary-green); }
 
-        /* Map & Grid */
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 450px;
-            gap: 25px;
-        }
+        /* Layout */
+        .main-grid { display: grid; grid-template-columns: 1fr 450px; gap: 25px; }
         @media (max-width: 1100px) { .main-grid { grid-template-columns: 1fr; } }
-
         #map { height: 550px; border-radius: 12px; z-index: 1; border: 2px solid white; box-shadow: inset 0 0 10px rgba(0,0,0,0.05); }
-
-        /* Charts */
         .chart-box { height: 350px; width: 100%; }
 
         /* Table */
@@ -133,10 +95,8 @@
         th { background: var(--light-green); color: var(--dark-text); padding: 15px; text-align: left; font-weight: 700; }
         td { padding: 12px 15px; border-bottom: 1px solid #eee; }
         tr:hover td { background: #f9fbe7; }
-        
-        /* Status Badges */
         .badge { padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
-        
+
         /* Loader */
         #loader {
             position: fixed; inset: 0; background: rgba(255,255,255,0.95);
@@ -154,13 +114,13 @@
 
 <div id="loader">
     <div class="spinner"></div>
-    <h3 style="color: var(--dark-text); margin-top: 20px;">กำลังเชื่อมต่อฐานข้อมูล...</h3>
+    <h3 style="color: var(--dark-text); margin-top: 20px;">กำลังประมวลผลข้อมูล...</h3>
 </div>
 
 <header class="header">
     <div class="title-box">
         <h1>CP ALL Fire Fighter Safety Switch</h1>
-        <p>INTELLIGENT MONITORING DASHBOARD</p>
+        <p>INTELLIGENT MONITORING DASHBOARD (Executive View)</p>
     </div>
     <div>
         <div class="filter-bar">
@@ -181,35 +141,22 @@
 </header>
 
 <div class="container">
-    
     <div class="kpi-grid">
         <div class="card kpi-card">
             <div class="kpi-icon"><i class="fa-solid fa-chart-pie"></i></div>
-            <div>
-                <div class="kpi-value" id="kpi-progress">0%</div>
-                <div class="kpi-label">ความคืบหน้าภาพรวม</div>
-            </div>
+            <div><div class="kpi-value" id="kpi-progress">0%</div><div class="kpi-label">ความคืบหน้าภาพรวม</div></div>
         </div>
         <div class="card kpi-card">
             <div class="kpi-icon" style="color: #2e7d32;"><i class="fa-solid fa-building-circle-check"></i></div>
-            <div>
-                <div class="kpi-value" id="kpi-done">0</div>
-                <div class="kpi-label">หน่วยงานที่เสร็จสิ้น</div>
-            </div>
+            <div><div class="kpi-value" id="kpi-done">0</div><div class="kpi-label">หน่วยงานที่เสร็จสิ้น</div></div>
         </div>
         <div class="card kpi-card">
             <div class="kpi-icon" style="color: #fbc02d;"><i class="fa-solid fa-person-digging"></i></div>
-            <div>
-                <div class="kpi-value" id="kpi-working">0</div>
-                <div class="kpi-label">กำลังดำเนินการ</div>
-            </div>
+            <div><div class="kpi-value" id="kpi-working">0</div><div class="kpi-label">กำลังดำเนินการ</div></div>
         </div>
         <div class="card kpi-card">
             <div class="kpi-icon" style="color: #d32f2f;"><i class="fa-solid fa-map"></i></div>
-            <div>
-                <div class="kpi-value" id="kpi-total">0</div>
-                <div class="kpi-label">จำนวนหน่วยงานทั้งหมด</div>
-            </div>
+            <div><div class="kpi-value" id="kpi-total">0</div><div class="kpi-label">จำนวนหน่วยงานทั้งหมด</div></div>
         </div>
     </div>
 
@@ -218,7 +165,6 @@
             <h3 style="margin: 10px 0 15px 15px; color: var(--dark-text);"><i class="fa-solid fa-location-dot"></i> แผนที่แสดงสถานะโครงการ</h3>
             <div id="map"></div>
         </div>
-
         <div style="display: flex; flex-direction: column; gap: 25px;">
             <div class="card">
                 <h3 style="margin-top:0; color: var(--dark-text);">สัดส่วนงาน (Work Breakdown)</h3>
@@ -232,12 +178,12 @@
     </div>
 
     <div class="card">
-        <h3 style="margin-top:0; color: var(--dark-text);"><i class="fa-solid fa-chart-column"></i> กราฟแสดงความคืบหน้ารายหน่วยงาน (Progress by Site)</h3>
+        <h3 style="margin-top:0; color: var(--dark-text);"><i class="fa-solid fa-chart-column"></i> กราฟแสดงความคืบหน้ารายหน่วยงาน (WBS 1-19)</h3>
         <div id="mainBarChart" class="chart-box"></div>
     </div>
 
     <div class="card">
-        <h3 style="margin-top:0; color: var(--dark-text);"><i class="fa-solid fa-list"></i> ตารางรายละเอียดสถานะ (Detailed Status)</h3>
+        <h3 style="margin-top:0; color: var(--dark-text);"><i class="fa-solid fa-list"></i> ตารางรายละเอียดสถานะ (Executive Summary)</h3>
         <div style="overflow-x: auto;">
             <table>
                 <thead>
@@ -254,15 +200,12 @@
             </table>
         </div>
     </div>
-
 </div>
 
 <script>
-    // Link to Google Sheet CSV
     const CSV_LINK = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGo5Zvqs3gYA7jzn_Fh5Wsn85H9k-UmJVSj4Y9i5xizESjXWLfORXj33tLCoH8Sg/pub?output=csv';
 
-    // Region & Coordinates Mapping
-    // Config นี้ใช้กรณีที่ใน CSV ไม่ได้ใส่ Lat/Long มาให้ จะใช้ค่า Default นี้แทน
+    // Config พิกัดและภูมิภาค
     const SITE_CONFIG = {
         "1": { region: "กลาง", lat: 13.91, lng: 100.41 },
         "2": { region: "กลาง", lat: 13.92, lng: 100.42 },
@@ -285,7 +228,6 @@
         "19": { region: "ใต้", lat: 7.95, lng: 98.33 }
     };
 
-    // Helper: เดาภูมิภาคจากชื่อ (กรณีไม่อยู่ใน Config)
     function getRegionByName(name) {
         if (!name) return "กลาง";
         if (name.includes("Khonkaen") || name.includes("Buriram") || name.includes("Ratchasima")) return "ตะวันออกเฉียงเหนือ";
@@ -298,83 +240,77 @@
     let map, pieChart, barChart, mainBarChart, rawData = [];
 
     function init() {
-        // Init Map
         map = L.map('map').setView([13.7, 100.5], 6);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
 
-        // Init Charts
         pieChart = echarts.init(document.getElementById('pieChart'));
         barChart = echarts.init(document.getElementById('barChart'));
         mainBarChart = echarts.init(document.getElementById('mainBarChart'));
 
         fetchData();
-        // Auto refresh every 5 minutes
         setInterval(fetchData, 300000); 
-        
         window.onresize = () => { pieChart.resize(); barChart.resize(); mainBarChart.resize(); };
     }
 
     function fetchData() {
-        // *สำคัญ* เพิ่ม timestamp เพื่อป้องกัน Cache
         const urlWithTimestamp = CSV_LINK + '&t=' + Date.now();
-
         Papa.parse(urlWithTimestamp, {
             download: true,
-            header: false, // ใช้ index อ้างอิง (เพราะเราไม่แน่ใจชื่อ Header ใน Sheet)
+            header: false,
             skipEmptyLines: true,
             complete: function(res) {
                 const processed = [];
-                
-                // เริ่ม loop ข้อมูล (row)
                 res.data.forEach(row => {
-                    // Index: 1=WBS, 2=Name, 5=DueDate, 7=Progress (อ้างอิงจากโค้ดเดิม)
-                    const wbs = row[1]?.trim();
+                    const wbsStr = row[1]?.trim(); // WBS column
                     const name = row[2];
                     
-                    // กรองเฉพาะแถวที่มีข้อมูล WBS และชื่อ
-                    if (wbs && name) { 
-                        let region = "กลาง";
-                        let lat = 13.7, lng = 100.5;
+                    // --- เงื่อนไขการกรอง (Filter Logic) ---
+                    // 1. มีค่า WBS
+                    // 2. ไม่มีจุดทศนิยม (ตัด 1.1, 1.2 ทิ้ง)
+                    // 3. เป็นตัวเลข
+                    // 4. อยู่ระหว่าง 1 ถึง 19 เท่านั้น
+                    if (wbsStr && !wbsStr.includes('.') && !isNaN(wbsStr)) {
+                        const wbsNum = parseInt(wbsStr);
+                        if (wbsNum >= 1 && wbsNum <= 19 && name) {
+                            
+                            let region = "กลาง";
+                            let lat = 13.7, lng = 100.5;
 
-                        // Priority 1: ดูใน Config ตาม WBS
-                        if (SITE_CONFIG[wbs]) {
-                            region = SITE_CONFIG[wbs].region;
-                            lat = SITE_CONFIG[wbs].lat;
-                            lng = SITE_CONFIG[wbs].lng;
-                        } 
-                        // Priority 2: เดาจากชื่อ
-                        else {
-                            region = getRegionByName(name);
+                            if (SITE_CONFIG[wbsNum]) {
+                                region = SITE_CONFIG[wbsNum].region;
+                                lat = SITE_CONFIG[wbsNum].lat;
+                                lng = SITE_CONFIG[wbsNum].lng;
+                            } else {
+                                region = getRegionByName(name);
+                            }
+                            
+                            // Override Check
+                            if(name.includes("Khonkaen") || name.includes("Buriram") || name.includes("Ratchasima")) region = "ตะวันออกเฉียงเหนือ";
+                            if(name.includes("Lamphun") || name.includes("Nakornsawan")) region = "เหนือ";
+                            if(name.includes("Suratthani") || name.includes("Hatyai") || name.includes("Phuket")) region = "ใต้";
+
+                            processed.push({
+                                wbs: wbsStr, 
+                                name: name, 
+                                progress: parseFloat(row[7]) || 0,
+                                due: row[5] || "-", 
+                                region: region, 
+                                lat: lat, lng: lng
+                            });
                         }
-
-                        // Override: ตรวจสอบชื่ออีกครั้งเพื่อความแม่นยำ
-                        if(name.includes("Khonkaen") || name.includes("Buriram") || name.includes("Ratchasima")) region = "ตะวันออกเฉียงเหนือ";
-                        if(name.includes("Lamphun") || name.includes("Nakornsawan")) region = "เหนือ";
-                        if(name.includes("Suratthani") || name.includes("Hatyai") || name.includes("Phuket")) region = "ใต้";
-
-                        processed.push({
-                            wbs: wbs, 
-                            name: name, 
-                            progress: parseFloat(row[7]) || 0, // แปลง Progress เป็นตัวเลข
-                            due: row[5] || "-", 
-                            region: region, 
-                            lat: lat, 
-                            lng: lng
-                        });
                     }
                 });
 
+                // เรียงลำดับตาม WBS 1-19
+                processed.sort((a, b) => parseInt(a.wbs) - parseInt(b.wbs));
+
                 rawData = processed;
                 runFilter();
-                
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('lastUpdate').innerText = new Date().toLocaleTimeString('th-TH');
             },
             error: function(err) {
                 console.error("Error:", err);
-                document.getElementById('loader').innerHTML = "<h3 style='color:red'>เกิดข้อผิดพลาดในการโหลดข้อมูล</h3>";
             }
         });
     }
@@ -382,7 +318,6 @@
     function runFilter() {
         const query = document.getElementById('search').value.toLowerCase();
         const region = document.getElementById('regionSelect').value;
-        
         const filtered = rawData.filter(d => 
             (d.name && d.name.toLowerCase().includes(query)) && 
             (region === 'All' || d.region === region)
@@ -391,10 +326,10 @@
     }
 
     function getColor(p) {
-        if (p >= 100) return '#4caf50'; // Green
-        if (p > 50) return '#29b6f6';   // Blue
-        if (p > 25) return '#ffb74d';   // Orange
-        return '#ef5350';               // Red
+        if (p >= 100) return '#4caf50'; 
+        if (p > 50) return '#29b6f6';   
+        if (p > 25) return '#ffb74d';   
+        return '#ef5350';               
     }
 
     function updateUI(data) {
@@ -407,22 +342,21 @@
         document.getElementById('kpi-working').innerText = data.length - done;
         document.getElementById('kpi-total').innerText = data.length;
 
-        // Map: Remove old markers & Add new ones
+        // Map
         map.eachLayer(l => { if (l instanceof L.CircleMarker) map.removeLayer(l); });
-        
         data.forEach(s => {
             L.circleMarker([s.lat, s.lng], {
                 radius: 10, fillColor: getColor(s.progress), color: '#fff', weight: 2, fillOpacity: 0.9
             }).addTo(map).bindPopup(`<b>${s.name}</b><br>สถานะ: ${s.progress}%`);
         });
 
-        // Main Bar Chart (2D)
+        // Main Bar Chart
         mainBarChart.setOption({
             tooltip: { trigger: 'axis' },
             grid: { left: '3%', right: '4%', bottom: '15%', containLabel: true },
             xAxis: { 
                 type: 'category', 
-                data: data.map(s => s.name.substring(0, 15)), // ตัดชื่อให้สั้นลงถ้าล้น
+                data: data.map(s => `[${s.wbs}] ${s.name.substring(0, 10)}..`),
                 axisLabel: { rotate: 45, interval: 0 } 
             },
             yAxis: { type: 'value', max: 100 },
@@ -442,8 +376,7 @@
         pieChart.setOption({
             tooltip: { trigger: 'item' },
             series: [{
-                type: 'pie',
-                radius: ['40%', '70%'],
+                type: 'pie', radius: ['40%', '70%'],
                 data: [
                     { value: done, name: 'เสร็จสิ้น', itemStyle: { color: '#4caf50' } },
                     { value: data.length - done, name: 'กำลังดำเนินการ', itemStyle: { color: '#ffb74d' } }
@@ -476,8 +409,8 @@
         data.forEach(s => {
             const color = getColor(s.progress);
             tbody.innerHTML += `<tr>
-                <td>${s.wbs}</td>
-                <td><b>${s.name}</b></td>
+                <td><b>${s.wbs}</b></td>
+                <td>${s.name}</td>
                 <td><span class="badge" style="background:#f1f8e9; color:#33691e">${s.region}</span></td>
                 <td>
                     <div style="background:#e0e0e0; border-radius:10px; height:8px;">
